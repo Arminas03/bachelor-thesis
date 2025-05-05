@@ -27,12 +27,14 @@ def transform_volatility_by_horizon(true_volatility, horizon):
     return transformed_vol
 
 
-def transform_predictors_to_dwm(predictors):
+def transform_predictors_to_dwm(predictors, horizon):
     final_predictors = []
     for _, predictor in predictors.items():
-        for horizon in [1, 5, 22]:
+        for steps in [1, 5, 22]:
             final_predictors.append(
-                transform_volatility_by_horizon(predictor, horizon)[(22 - horizon) : -1]
+                transform_volatility_by_horizon(predictor, steps)[
+                    (22 - steps) : -horizon
+                ]
             )
 
     return final_predictors
@@ -42,8 +44,6 @@ def increasing_window_estimation(X, y):
     X_train = X[:-1758]
     y_train, y_test = y[:-1758], y[-1758:]
     y_hat = []
-    print(y_test[0])
-    print(len(X_train))
 
     for i in range(1758, -1, -1):
         y_hat.append(
@@ -56,7 +56,9 @@ def increasing_window_estimation(X, y):
 
 
 def regress(predictors, true_volatility, horizon):
-    predictors_transformed = np.array(transform_predictors_to_dwm(predictors)).T
+    predictors_transformed = np.array(
+        transform_predictors_to_dwm(predictors, horizon)
+    ).T
     true_volatility_transformed = np.array(
         transform_volatility_by_horizon(true_volatility, horizon)[22:]
     )
