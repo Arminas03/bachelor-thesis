@@ -40,6 +40,14 @@ def transform_predictors_to_dwm(predictors, horizon):
     return final_predictors
 
 
+def winsorise(y, y_hat):
+    if y_hat[0] > max(y):
+        return [max(y)]
+    if y_hat[0] < min(y):
+        return [min(y)]
+    return y_hat
+
+
 def increasing_window_estimation(X, y):
     X_train = X[:-1758]
     y_train, y_test = y[:-1758], y[-1758:]
@@ -49,8 +57,28 @@ def increasing_window_estimation(X, y):
         y_hat.append(
             get_regression_model(X_train, y_train).predict(X[-i].reshape(1, -1))
         )
+        y_hat[-1] = winsorise(y_train, y_hat[-1])
         X_train = np.append(X_train, X[-i].reshape(1, -1), axis=0)
         y_train = np.append(y_train, [y[-i]], axis=0)
+
+    get_prediction_analysis(y_test, y_hat)
+
+
+def rolling_window_estimation(X, y):
+    X_train = X[:1000]
+    y_train, y_test = y[:1000], y[1000:]
+    y_hat = []
+
+    for i in range(1000, len(y)):
+        y_hat.append(
+            get_regression_model(X_train, y_train).predict(X[i].reshape(1, -1))
+        )
+        y_hat[-1] = winsorise(y_train, y_hat[-1])
+        X_train = np.append(X_train, X[i].reshape(1, -1), axis=0)
+        y_train = np.append(y_train, [y[i]], axis=0)
+
+        X_train = X_train[1:]
+        y_train = y_train[1:]
 
     get_prediction_analysis(y_test, y_hat)
 
@@ -63,15 +91,24 @@ def regress(predictors, true_volatility, horizon):
         transform_volatility_by_horizon(true_volatility, horizon)[22:]
     )
 
-    increasing_window_estimation(predictors_transformed, true_volatility_transformed)
+    rolling_window_estimation(predictors_transformed, true_volatility_transformed)
 
 
 def main():
-    lr_predictors = {"HAR-RV": ["RV"], "HAR-TV": ["TV"]}
+    lr_predictors = {
+        "HAR-RV": ["RV"],
+        "HAR-TV": ["TV"],
+        "HAR-OV": ["OV"],
+        "HAR-EV": ["EV"],
+        "HAR-MV": ["OV", "TV"],
+    }
     data = get_data("data_files/Todorov-Zhang-JAE-2021.csv")
 
-    regress(data[lr_predictors["HAR-RV"]], data["RV"], 1)
-    regress(data[lr_predictors["HAR-TV"]], data["RV"], 1)
+    for horizon in [1, 5, 22]:
+        print(horizon)
+        for model, predictors in lr_predictors.items():
+            print(model)
+            regress(data[predictors], data["RV"], horizon)
 
 
 if __name__ == "__main__":
