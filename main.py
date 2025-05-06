@@ -41,10 +41,10 @@ def transform_predictors_to_dwm(predictors, horizon):
 
 
 def winsorise(y, y_hat):
-    if y_hat[0] > max(y):
-        return [max(y)]
-    if y_hat[0] < min(y):
-        return [min(y)]
+    if y_hat > max(y):
+        return max(y)
+    if y_hat < min(y):
+        return min(y)
     return y_hat
 
 
@@ -53,9 +53,9 @@ def increasing_window_estimation(X, y):
     y_train, y_test = y[:-1758], y[-1758:]
     y_hat = []
 
-    for i in range(1758, -1, -1):
+    for i in range(1758, 0, -1):
         y_hat.append(
-            get_regression_model(X_train, y_train).predict(X[-i].reshape(1, -1))
+            get_regression_model(X_train, y_train).predict(X[-i].reshape(1, -1))[0]
         )
         y_hat[-1] = winsorise(y_train, y_hat[-1])
         X_train = np.append(X_train, X[-i].reshape(1, -1), axis=0)
@@ -71,7 +71,7 @@ def rolling_window_estimation(X, y):
 
     for i in range(1000, len(y)):
         y_hat.append(
-            get_regression_model(X_train, y_train).predict(X[i].reshape(1, -1))
+            get_regression_model(X_train, y_train).predict(X[i].reshape(1, -1))[0]
         )
         y_hat[-1] = winsorise(y_train, y_hat[-1])
         X_train = np.append(X_train, X[i].reshape(1, -1), axis=0)
@@ -91,7 +91,7 @@ def regress(predictors, true_volatility, horizon):
         transform_volatility_by_horizon(true_volatility, horizon)[22:]
     )
 
-    rolling_window_estimation(predictors_transformed, true_volatility_transformed)
+    increasing_window_estimation(predictors_transformed, true_volatility_transformed)
 
 
 def main():
