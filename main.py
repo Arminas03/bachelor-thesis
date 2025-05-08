@@ -48,28 +48,12 @@ def winsorise(y, y_hat):
     return y_hat
 
 
-def increasing_window_estimation(X, y):
-    X_train = X[:-1758]
-    y_train, y_test = y[:-1758], y[-1758:]
+def increasing_window_estimation(X, y, initial_iw_size=1000):
+    X_train = X[:initial_iw_size]
+    y_train, y_test = y[:initial_iw_size], y[initial_iw_size:]
     y_hat = []
 
-    for i in range(1758, 0, -1):
-        y_hat.append(
-            get_regression_model(X_train, y_train).predict(X[-i].reshape(1, -1))[0]
-        )
-        y_hat[-1] = winsorise(y_train, y_hat[-1])
-        X_train = np.append(X_train, X[-i].reshape(1, -1), axis=0)
-        y_train = np.append(y_train, [y[-i]], axis=0)
-
-    get_prediction_analysis(y_test, y_hat)
-
-
-def rolling_window_estimation(X, y):
-    X_train = X[:1000]
-    y_train, y_test = y[:1000], y[1000:]
-    y_hat = []
-
-    for i in range(1000, len(y)):
+    for i in range(initial_iw_size, len(y)):
         y_hat.append(
             get_regression_model(X_train, y_train).predict(X[i].reshape(1, -1))[0]
         )
@@ -77,10 +61,23 @@ def rolling_window_estimation(X, y):
         X_train = np.append(X_train, X[i].reshape(1, -1), axis=0)
         y_train = np.append(y_train, [y[i]], axis=0)
 
-        X_train = X_train[1:]
-        y_train = y_train[1:]
+    return get_prediction_analysis(y_test, y_hat)
 
-    get_prediction_analysis(y_test, y_hat)
+
+def rolling_window_estimation(X, y, rw_size=1000):
+    X_train = X[:rw_size]
+    y_train, y_test = y[:rw_size], y[rw_size:]
+    y_hat = []
+
+    for i in range(rw_size, len(y)):
+        y_hat.append(
+            get_regression_model(X_train, y_train).predict(X[i].reshape(1, -1))[0]
+        )
+        y_hat[-1] = winsorise(y_train, y_hat[-1])
+        X_train = np.append(X_train, X[i].reshape(1, -1), axis=0)[1:]
+        y_train = np.append(y_train, [y[i]], axis=0)[1:]
+
+    return get_prediction_analysis(y_test, y_hat)
 
 
 def regress(predictors, true_volatility, horizon):
@@ -91,24 +88,30 @@ def regress(predictors, true_volatility, horizon):
         transform_volatility_by_horizon(true_volatility, horizon)[22:]
     )
 
-    increasing_window_estimation(predictors_transformed, true_volatility_transformed)
+    return rolling_window_estimation(
+        predictors_transformed, true_volatility_transformed, 1000
+    )
 
 
 def main():
     lr_predictors = {
         "HAR-RV": ["RV"],
         "HAR-TV": ["TV"],
-        "HAR-OV": ["OV"],
-        "HAR-EV": ["EV"],
-        "HAR-MV": ["OV", "TV"],
+        # "HAR-OV": ["OV"],
+        # "HAR-EV": ["EV"],
+        # "HAR-MV": ["OV", "TV"],
     }
+    horizons = [1]
+    mse = dict()
     data = get_data("data_files/Todorov-Zhang-JAE-2021.csv")
 
-    for horizon in [1, 5, 22]:
+    for horizon in horizons:
         print(horizon)
         for model, predictors in lr_predictors.items():
             print(model)
-            regress(data[predictors], data["RV"], horizon)
+            mse[model] = regress(data[predictors], data["RV"], horizon)[0]
+
+    print(mse["HAR-RV"] / mse["HAR-TV"])
 
 
 if __name__ == "__main__":
