@@ -73,6 +73,10 @@ def rolling_window_estimation(X, y, rw_size=1000):
         y_hat.append(
             get_regression_model(X_train, y_train).predict(X[i].reshape(1, -1))[0]
         )
+        # x_i = X[i].reshape(1, -1)
+        # x_i = sm.add_constant(x_i, has_constant="add")
+        # y_hat.append(get_regression_model(X_train, y_train).predict(x_i)[0])
+
         y_hat[-1] = winsorise(y_train, y_hat[-1])
         X_train = np.append(X_train, X[i].reshape(1, -1), axis=0)[1:]
         y_train = np.append(y_train, [y[i]], axis=0)[1:]
@@ -101,7 +105,7 @@ def main():
         # "HAR-EV": ["EV"],
         # "HAR-MV": ["OV", "TV"],
     }
-    horizons = [1]
+    horizons = [1, 5, 21]
     mse = dict()
     data = get_data("data_files/Todorov-Zhang-JAE-2021.csv")
 
@@ -111,7 +115,7 @@ def main():
             print(model)
             mse[model] = regress(data[predictors], data["RV"], horizon)[0]
 
-    print(mse["HAR-RV"] / mse["HAR-TV"])
+        print(mse["HAR-RV"] / mse["HAR-TV"])
 
 
 if __name__ == "__main__":
