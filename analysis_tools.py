@@ -10,9 +10,11 @@ def plot_true_vs_pred(y_true, y_pred):
     plt.show()
 
 
-def get_mse(y_true, y_pred):
-    return float(np.mean((y_true - y_pred) ** 2))
+def get_squared_errors(y_true, y_pred):
+    squared_errors = (y_true - y_pred) ** 2
+    return float(np.mean(squared_errors)), float(np.median(squared_errors))
 
 
 def get_qlike(y_true, y_pred):
-    return float(np.mean(y_true / y_pred - np.log(y_true / y_pred) - 1))
+    qlike = y_true / y_pred - np.log(y_true / y_pred) - 1
+    return float(np.mean(qlike)), float(np.median(qlike))
