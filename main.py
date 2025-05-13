@@ -43,15 +43,22 @@ def get_regressions_with_jv_args():
     return lr_predictors, target, horizons, estimation_methods
 
 
+def reformat_dict(loss_dict):
+    return {",".join(map(str, key)): value for key, value in loss_dict.items()}
+
+
 def main():
     with open("regressions_on_rv_results.json", "w") as f:
-        json.dump(get_regression_results(**get_regressions_on_rv_args), f)
+        loss_values_on_rv = get_regression_results(*get_regressions_on_rv_args())
+        json.dump(reformat_dict(loss_values_on_rv), f)
 
     with open("regressions_on_orv_results.json", "w") as f:
-        json.dump(get_regression_results(**get_regressions_on_orv_args), f)
+        loss_values_on_orv = get_regression_results(*get_regressions_on_orv_args())
+        json.dump(reformat_dict(loss_values_on_orv), f)
 
     with open("regressions_with_jv_results.json", "w") as f:
-        json.dump(get_regression_results(**get_regressions_with_jv_args), f)
+        loss_values_with_jv = get_regression_results(*get_regressions_with_jv_args())
+        json.dump(reformat_dict(loss_values_with_jv), f)
 
 
 if __name__ == "__main__":

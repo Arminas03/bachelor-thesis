@@ -131,6 +131,11 @@ def get_regression_results(lr_predictors, target, horizons, estimation_methods):
                 rolling_window if estimation_method == "rw" else increasing_window
             )
             for model, predictors in lr_predictors.items():
+                print(
+                    f"Finished results for horizon {horizon}, "
+                    + f"estimation method {estimation_method}, model {model}"
+                )
+
                 regression_results = regress(
                     data[predictors], data[target], horizon, estimation_function
                 )

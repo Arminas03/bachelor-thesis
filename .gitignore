@@ -3,3 +3,4 @@ myenv
 test.py
 __pycache__
 *.xlsx
+*.json
