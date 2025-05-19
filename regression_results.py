@@ -1,13 +1,8 @@
 import pandas as pd
 import numpy as np
 from linear_regression import get_regression_model, get_prediction_analysis
-
-
-def get_data(path):
-    data = pd.read_csv(path).rename(columns={"???Date": "date"})
-    data["date"] = pd.to_datetime(data["date"])
-
-    return data
+from utils import get_data
+import time
 
 
 def transform_volatility_by_horizon(true_volatility, horizon):
@@ -121,9 +116,8 @@ def standardize_loss(loss_values, by_model):
             loss_values[spec] = 1
 
 
-def get_regression_results(lr_predictors, target, horizons, estimation_methods):
+def get_regression_results(lr_predictors, target, horizons, estimation_methods, data):
     loss_values = dict()
-    data = get_data("data_files/Todorov-Zhang-JAE-2021.csv")
 
     for horizon in horizons:
         for estimation_method in estimation_methods:
@@ -131,11 +125,6 @@ def get_regression_results(lr_predictors, target, horizons, estimation_methods):
                 rolling_window if estimation_method == "rw" else increasing_window
             )
             for model, predictors in lr_predictors.items():
-                print(
-                    f"Finished results for horizon {horizon}, "
-                    + f"estimation method {estimation_method}, model {model}"
-                )
-
                 regression_results = regress(
                     data[predictors], data[target], horizon, estimation_function
                 )
@@ -143,6 +132,28 @@ def get_regression_results(lr_predictors, target, horizons, estimation_methods):
                     loss_values, regression_results, horizon, estimation_method, model
                 )
 
+                print(
+                    f"Finished results for horizon {horizon}, "
+                    + f"estimation method {estimation_method}, model {model}"
+                )
+
     standardize_loss(loss_values, "HAR-TV")
 
     return loss_values
+
+
+if __name__ == "__main__":
+    lr_predictors = {
+        "HAR-RV": ["RV"],
+        "HAR-TV": ["TV"],
+        # "HAR-OV": ["OV"],
+        # "HAR-EV": ["EV"],
+        # "HAR-MV": ["OV", "TV"],
+    }
+    target = "RV"
+    horizons = [1, 5, 22]
+    estimation_methods = ["rw"]
+
+    get_regression_results(
+        lr_predictors, target, horizons, estimation_methods, get_data()
+    )

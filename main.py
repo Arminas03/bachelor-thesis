@@ -1,5 +1,6 @@
 from regression_results import get_regression_results
 import json
+from utils import get_data
 
 
 def get_regressions_on_rv_args():
@@ -48,16 +49,22 @@ def reformat_dict(loss_dict):
 
 
 def main():
+    data = get_data("data_files/Todorov-Zhang-JAE-2021.csv")
+
     with open("regressions_on_rv_results.json", "w") as f:
-        loss_values_on_rv = get_regression_results(*get_regressions_on_rv_args())
+        loss_values_on_rv = get_regression_results(*get_regressions_on_rv_args(), data)
         json.dump(reformat_dict(loss_values_on_rv), f)
 
     with open("regressions_on_orv_results.json", "w") as f:
-        loss_values_on_orv = get_regression_results(*get_regressions_on_orv_args())
+        loss_values_on_orv = get_regression_results(
+            *get_regressions_on_orv_args(), data
+        )
         json.dump(reformat_dict(loss_values_on_orv), f)
 
     with open("regressions_with_jv_results.json", "w") as f:
-        loss_values_with_jv = get_regression_results(*get_regressions_with_jv_args())
+        loss_values_with_jv = get_regression_results(
+            *get_regressions_with_jv_args(), data
+        )
         json.dump(reformat_dict(loss_values_with_jv), f)
 
 

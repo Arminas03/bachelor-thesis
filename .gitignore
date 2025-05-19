@@ -1,6 +1,11 @@
 myenv
-*.csv
-test.py
 __pycache__
+old_res
+data_files
+
+*.csv
 *.xlsx
 *.json
+*.h5
+
+test.py
