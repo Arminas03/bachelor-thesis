@@ -11,7 +11,7 @@ from regression_results import (
 import h5py
 
 
-def main():
+def test():
     data = get_data()["RV"]
     y_pred_har = []
     y_pred_ceemdan_har = []
@@ -33,7 +33,9 @@ def main():
         y_pred_curr = []
 
         for imf in imfs:
-            x_train = np.array(transform_predictors_to_dwm(pd.DataFrame(imf), 1)).T
+            x_train = np.array(transform_predictors_to_dwm(pd.DataFrame(imf), 1))[
+                0
+            ].reshape(-1, 1)
             y_train = np.array(transform_volatility_by_horizon(pd.Series(imf), 1)[22:])
 
             y_pred_curr.append(
@@ -45,7 +47,7 @@ def main():
         actual.append(data[i + 1000])
         print(i)
 
-        if i == 500:
+        if i == 50:
             break
 
     print(np.mean((np.array(y_pred_har) - np.array(actual)) ** 2))
@@ -58,20 +60,18 @@ def decompose_series_with_ceemdan(
     with h5py.File(f"final_imfs_{'rw' if rolling else 'iw'}.h5", "w") as f_h5:
         for i in range(len(series) - window_size + 1):
             print("rw" if rolling else "iw", i)
-            curr_window = series[i : window_size + i].to_numpy()
+            curr_window = series[i if rolling else 0 : window_size + i].to_numpy()
 
             f_h5.create_dataset(
                 name=f"window_{i}",
                 data=ceemdan.ceemdan(curr_window),
                 compression="gzip",
             )
-            break
 
 
 if __name__ == "__main__":
-    # ceemdan = CEEMDAN(seed=0)
-    # data = get_data()["RV"]
+    ceemdan = CEEMDAN(seed=0)
+    data = get_data()["RV"]
 
-    # decompose_series_with_ceemdan(data, ceemdan)
-    # decompose_series_with_ceemdan()
-    main()
+    decompose_series_with_ceemdan(data, ceemdan)
+    decompose_series_with_ceemdan(data, ceemdan, rolling=False)
