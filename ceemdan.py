@@ -11,47 +11,17 @@ from regression_results import (
 import h5py
 
 
-def test():
-    data = get_data()["RV"]
-    y_pred_har = []
-    y_pred_ceemdan_har = []
-    actual = []
-    ceemdan = CEEMDAN(seed=1)
+def get_imf_counter():
+    with h5py.File("final_imfs_rw_rv.h5", "a") as f_h5:
+        imf_counter = dict()
+        for key in list(f_h5.keys()):
+            num_imf = len(f_h5[key])
+            if num_imf in imf_counter:
+                imf_counter[num_imf] += 1
+            else:
+                imf_counter[num_imf] = 1
 
-    for i in range(len(data) - 1000):
-        rv_ts = data[i : 1000 + i].to_numpy()
-        x_train = np.array(transform_predictors_to_dwm(pd.DataFrame(rv_ts), 1)).T
-
-        imfs = ceemdan.ceemdan(rv_ts)
-        y_train = np.array(transform_volatility_by_horizon(pd.Series(rv_ts), 1)[22:])
-        y_pred_har.append(
-            get_regression_model(x_train, y_train).predict(x_train[-1].reshape(1, -1))[
-                0
-            ]
-        )
-
-        y_pred_curr = []
-
-        for imf in imfs:
-            x_train = np.array(transform_predictors_to_dwm(pd.DataFrame(imf), 1))[
-                0
-            ].reshape(-1, 1)
-            y_train = np.array(transform_volatility_by_horizon(pd.Series(imf), 1)[22:])
-
-            y_pred_curr.append(
-                get_regression_model(x_train, y_train).predict(
-                    x_train[-1].reshape(1, -1)
-                )[0]
-            )
-        y_pred_ceemdan_har.append(np.sum(y_pred_curr))
-        actual.append(data[i + 1000])
-        print(i)
-
-        if i == 50:
-            break
-
-    print(np.mean((np.array(y_pred_har) - np.array(actual)) ** 2))
-    print(np.mean((np.array(y_pred_ceemdan_har) - np.array(actual)) ** 2))
+    return imf_counter
 
 
 def decompose_series_with_ceemdan(
@@ -70,8 +40,8 @@ def decompose_series_with_ceemdan(
 
 
 if __name__ == "__main__":
-    ceemdan = CEEMDAN(seed=0)
-    data = get_data()["RV"]
+    # ceemdan = CEEMDAN(seed=0)
+    # data = get_data()["OV"]
 
-    decompose_series_with_ceemdan(data, ceemdan)
-    decompose_series_with_ceemdan(data, ceemdan, rolling=False)
+    # decompose_series_with_ceemdan(data, ceemdan)
+    print(get_imf_counter())
