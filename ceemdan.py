@@ -11,8 +11,8 @@ from regression_results import (
 import h5py
 
 
-def get_imf_counter():
-    with h5py.File("final_imfs_rw_rv.h5", "r") as f_h5:
+def get_imf_counter(h5_path):
+    with h5py.File(h5_path, "r") as f_h5:
         imf_counter = dict()
         for key in list(f_h5.keys()):
             num_imf = len(f_h5[key])
@@ -67,8 +67,9 @@ def test():
 def decompose_series_with_ceemdan(
     series: pd.Series, ceemdan: CEEMDAN, window_size=1000, rolling=True
 ):
+    # TODO: change name
     with h5py.File(f"final_imfs_{'rw' if rolling else 'iw'}.h5", "a") as f_h5:
-        for i in range(1174, len(series) - window_size + 1):
+        for i in range(len(series) - window_size + 1):
             print("rw" if rolling else "iw", i)
             curr_window = series[i if rolling else 0 : window_size + i].to_numpy()
 
@@ -79,11 +80,18 @@ def decompose_series_with_ceemdan(
             )
 
 
+def main():
+    # TODO: finish
+    estimators = ["RV", "OV", "TV", "EV", "JV"]
+    ceemdan = CEEMDAN(seed=0)
+
+    for estimator in estimators:
+        decompose_series_with_ceemdan(get_data()[estimator], ceemdan)
+
+
 if __name__ == "__main__":
     # ceemdan = CEEMDAN(seed=0)
-    # data = get_data()["OV"]
+    # data = get_data()["EV"]
 
     # decompose_series_with_ceemdan(data, ceemdan)
-    test()
-    # with h5py.File(f"final_imfs_rw.h5", "r") as f_h5:
-    #     print(f_h5.keys())
+    print(get_imf_counter("final_imfs_rw_ev.h5"))
