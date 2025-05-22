@@ -2,6 +2,7 @@ myenv
 __pycache__
 old_res
 data_files
+final_imfs
 
 *.csv
 *.xlsx

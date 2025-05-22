@@ -32,7 +32,7 @@ def transform_volatility_by_horizon(true_volatility, horizon):
 def transform_predictors_to_dwm(predictors, horizon):
     """
     Transforms predictors to daily, weekly, monthly format.
-    Note that after the transformation, 21 first valus are lost
+    Note that after the transformation, 21 first values are lost
     due to inability to calculate monthly predictor value
     """
     final_predictors = []
