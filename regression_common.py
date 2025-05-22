@@ -12,7 +12,7 @@ def get_regression_model(X, y, alpha_ridge=0, fit_intercept=True):
         epsilon=1.345,
         alpha=alpha_ridge,
         tol=1e-6,
-        max_iter=1000,
+        max_iter=2000,
     ).fit(X, y)
 
 
