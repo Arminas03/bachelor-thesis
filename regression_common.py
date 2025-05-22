@@ -1,16 +1,16 @@
 import numpy as np
 import pandas as pd
 
-from sklearn.linear_model import HuberRegressor
+from sklearn.linear_model import HuberRegressor, LinearRegression
 from analysis_tools import get_squared_errors, get_qlike
 from utils import transform_predictors_to_dwm, transform_volatility_by_horizon
 
 
-def get_regression_model(X, y, fit_intercept=True):
+def get_regression_model(X, y, alpha_ridge=0, fit_intercept=True):
     return HuberRegressor(
         fit_intercept=fit_intercept,
         epsilon=1.345,
-        alpha=0,
+        alpha=alpha_ridge,
         tol=1e-6,
         max_iter=1000,
     ).fit(X, y)

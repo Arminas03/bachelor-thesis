@@ -1,7 +1,9 @@
 from PyEMD import CEEMDAN
-from utils import get_data
 import pandas as pd
 import h5py
+import matplotlib.pyplot as plt
+
+from utils import get_data
 
 
 def get_imf_counter(h5_path):
@@ -21,7 +23,7 @@ def decompose_series_with_ceemdan(
     series: pd.Series, ceemdan: CEEMDAN, estimator_name, window_size=1000, rolling=True
 ):
     with h5py.File(
-        f"final_imfs_{'rw' if rolling else 'iw'}_{estimator_name}.h5", "w"
+        f"final_imfs/final_imfs_{'rw' if rolling else 'iw'}_{estimator_name}.h5", "w"
     ) as f_h5:
         for i in range(len(series) - window_size + 1):
             print("rw" if rolling else "iw", i)
@@ -32,6 +34,22 @@ def decompose_series_with_ceemdan(
                 data=ceemdan.ceemdan(curr_window),
                 compression="gzip",
             )
+
+
+def plot_first_imf(estimator):
+    with h5py.File(f"final_imfs/final_imfs_rw_{estimator}.h5", "r") as f_h5:
+        imfs = f_h5["window_0"][:]
+        n_imfs = imfs.shape[0]
+
+        _, axes = plt.subplots(n_imfs, 1, figsize=(12, 2 * n_imfs), sharex=True)
+        for i in range(n_imfs):
+            axes[i].plot(imfs[i], label=f"IMF {i+1}")
+            axes[i].legend(loc="upper right")
+            axes[i].grid(True)
+
+        axes[-1].set_xlabel("Time")
+        plt.tight_layout()
+        plt.show()
 
 
 def main():
@@ -46,4 +64,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    plot_first_imf("ov")

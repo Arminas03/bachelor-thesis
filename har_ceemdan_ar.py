@@ -1,6 +1,6 @@
 import numpy as np
-import pandas as pd
 import h5py
+
 
 from utils import get_data
 from regression_common import (
@@ -10,14 +10,15 @@ from regression_common import (
     get_regression_model,
     winsorise,
 )
+from analysis_tools import plot_true_vs_pred
 
 
-def get_har_rv_pred():
-    rv_ts = get_data()["RV"]
+def get_har_pred(target, pred_var):
+    data = get_data()
+    target_ts = data[target]
+    predictor_ts = data[[pred_var]]
 
-    return regress(
-        pd.DataFrame(rv_ts), rv_ts, horizon=1, estimation_method=rolling_window
-    )
+    return regress(predictor_ts, target_ts, horizon=1, estimation_method=rolling_window)
 
 
 def get_ceemdan_ar_pred(estimator_name, window_size=1000):
@@ -45,8 +46,12 @@ def get_ceemdan_ar_pred(estimator_name, window_size=1000):
 
 
 def main():
-    print(f"Loss HAR-RV: {get_prediction_loss(*get_har_rv_pred())}")
-    print(f"Loss CEEMDAN-AR: {get_prediction_loss(*get_ceemdan_ar_pred("RV"))}")
+    y_har_true, y_har_pred = get_har_pred("RV", "RV")
+    print(f"Loss HAR-RV: {get_prediction_loss(y_har_true, y_har_pred)}")
+    y_car_true, y_car_pred = get_ceemdan_ar_pred("RV")
+    print(f"Loss CEEMDAN-AR: {get_prediction_loss(y_car_true, y_car_pred)}")
+    plot_true_vs_pred(y_har_true, y_har_pred)
+    plot_true_vs_pred(y_car_true, y_car_pred)
 
 
 if __name__ == "__main__":
