@@ -1,38 +1,23 @@
-import pandas as pd
 import numpy as np
-from linear_regression import get_regression_model, get_prediction_analysis
-from utils import get_data
-import time
+from utils import get_data, transform_predictors_to_dwm, transform_volatility_by_horizon
+from sklearn.linear_model import HuberRegressor
+from analysis_tools import get_squared_errors, get_qlike
 
 
-def transform_volatility_by_horizon(true_volatility, horizon):
-    transformed_vol = []
-    c = 1
-    curr_sum_vol = 0
-    for i, true_vol in enumerate(true_volatility):
-        curr_sum_vol += true_vol
-        if c < horizon:
-            c += 1
-            continue
-
-        transformed_vol.append(curr_sum_vol)
-
-        curr_sum_vol -= true_volatility.iloc[i - horizon + 1]
-
-    return transformed_vol
+def get_regression_model(X, y, fit_intercept=True):
+    return HuberRegressor(
+        fit_intercept=fit_intercept,
+        epsilon=1.345,
+        alpha=0,
+        tol=1e-6,
+        max_iter=1000,
+    ).fit(X, y)
 
 
-def transform_predictors_to_dwm(predictors, horizon):
-    final_predictors = []
-    for _, predictor in predictors.items():
-        for steps in [1, 5, 22]:
-            final_predictors.append(
-                transform_volatility_by_horizon(predictor, steps)[
-                    (22 - steps) : -horizon
-                ]
-            )
+def get_prediction_loss(y, y_hat):
+    # plot_true_vs_pred(y_true=y, y_pred=y_hat)
 
-    return final_predictors
+    return get_squared_errors(y_true=y, y_pred=y_hat), get_qlike(y_true=y, y_pred=y_hat)
 
 
 def winsorise(y, y_hat):
@@ -56,7 +41,7 @@ def increasing_window(X, y, initial_iw_size=1000):
         X_train = np.append(X_train, X[i].reshape(1, -1), axis=0)
         y_train = np.append(y_train, [y[i]], axis=0)
 
-    return get_prediction_analysis(y_test, y_hat)
+    return get_prediction_loss(y_test, y_hat)
 
 
 def rolling_window(X, y, rw_size=1000):
@@ -73,7 +58,7 @@ def rolling_window(X, y, rw_size=1000):
         X_train = np.append(X_train, X[i].reshape(1, -1), axis=0)[1:]
         y_train = np.append(y_train, [y[i]], axis=0)[1:]
 
-    return get_prediction_analysis(y_test, y_hat)
+    return get_prediction_loss(y_test, y_hat)
 
 
 def regress(predictors, true_volatility, horizon, estimation_method):
@@ -140,20 +125,3 @@ def get_regression_results(lr_predictors, target, horizons, estimation_methods, 
     standardize_loss(loss_values, "HAR-TV")
 
     return loss_values
-
-
-if __name__ == "__main__":
-    lr_predictors = {
-        "HAR-RV": ["RV"],
-        "HAR-TV": ["TV"],
-        # "HAR-OV": ["OV"],
-        # "HAR-EV": ["EV"],
-        # "HAR-MV": ["OV", "TV"],
-    }
-    target = "RV"
-    horizons = [1, 5, 22]
-    estimation_methods = ["rw"]
-
-    get_regression_results(
-        lr_predictors, target, horizons, estimation_methods, get_data()
-    )
