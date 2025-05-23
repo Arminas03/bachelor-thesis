@@ -37,17 +37,18 @@ def decompose_series_with_ceemdan(
 
 
 def plot_first_imf(estimator):
-    with h5py.File(f"final_imfs/final_imfs_rw_{estimator}.h5", "r") as f_h5:
+    with h5py.File(f"final_imfs/final_imfs_rw_{estimator.lower()}.h5", "r") as f_h5:
         imfs = f_h5["window_0"][:]
         n_imfs = imfs.shape[0]
 
-        _, axes = plt.subplots(n_imfs, 1, figsize=(12, 2 * n_imfs), sharex=True)
+        figure, axes = plt.subplots(n_imfs, 1, figsize=(12, 2 * n_imfs), sharex=True)
         for i in range(n_imfs):
-            axes[i].plot(imfs[i], label=f"IMF {i+1}")
+            axes[i].plot(imfs[i], label=f"IMF {i+1}", linewidth=0.6)
             axes[i].legend(loc="upper right")
             axes[i].grid(True)
 
         axes[-1].set_xlabel("Time")
+        figure.canvas.manager.set_window_title(f"IMFs of {estimator}")
         plt.tight_layout()
         plt.show()
 
@@ -60,9 +61,6 @@ def main():
     for estimator in estimators:
         decompose_series_with_ceemdan(data[estimator], ceemdan, estimator)
 
-        # print(get_imf_counter("final_imfs_rw_rv.h5"))
-
 
 if __name__ == "__main__":
-    # main()
-    plot_first_imf("ov")
+    main()
