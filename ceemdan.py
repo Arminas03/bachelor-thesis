@@ -4,6 +4,7 @@ import h5py
 import matplotlib.pyplot as plt
 
 from utils import get_data
+from constants import *
 
 
 def get_imf_counter(h5_path):
@@ -23,7 +24,7 @@ def decompose_series_with_ceemdan(
     series: pd.Series, ceemdan: CEEMDAN, estimator_name, window_size=1000, rolling=True
 ):
     with h5py.File(
-        f"final_imfs/final_imfs_{'rw' if rolling else 'iw'}_{estimator_name}.h5", "w"
+        f"final_imfs_{'rw' if rolling else 'iw'}_{estimator_name}.h5", "w"
     ) as f_h5:
         for i in range(len(series) - window_size + 1):
             print("rw" if rolling else "iw", i)
@@ -37,7 +38,7 @@ def decompose_series_with_ceemdan(
 
 
 def plot_first_imf(estimator):
-    with h5py.File(f"final_imfs/final_imfs_rw_{estimator.lower()}.h5", "r") as f_h5:
+    with h5py.File(IMF_DATA_PATHS[estimator], "r") as f_h5:
         imfs = f_h5["window_0"][:]
         n_imfs = imfs.shape[0]
 

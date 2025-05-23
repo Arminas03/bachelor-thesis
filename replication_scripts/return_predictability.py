@@ -88,7 +88,7 @@ def get_regression_statistics(mkt, vrp_1, vrp_2, jrp):
     return res_dict_for_horizon
 
 
-def main():
+def get_return_predictability_json():
     jae_data = get_jae_data()
     allowed_dates = set(jae_data["date"])
     vix_series = trim_series(get_vix_close_data(), allowed_dates)
@@ -112,7 +112,3 @@ def main():
 
     with open("return_predictability.json", "w") as f:
         json.dump(res_dict, f)
-
-
-if __name__ == "__main__":
-    main()

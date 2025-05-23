@@ -12,6 +12,7 @@ from regression_common import (
     get_regression_model,
     winsorise,
 )
+from constants import *
 
 
 def get_har_pred(target_estimator, predictor_estimators):
@@ -25,9 +26,7 @@ def get_har_pred(target_estimator, predictor_estimators):
 def get_curr_imfs(i, predictor_estimators):
     imfs = []
     for predictor_estimator in predictor_estimators:
-        with h5py.File(
-            f"final_imfs/final_imfs_rw_{predictor_estimator.lower()}.h5", "r"
-        ) as f_h5:
+        with h5py.File(IMF_DATA_PATHS[predictor_estimator], "r") as f_h5:
             imfs.append(f_h5[f"window_{i+21}"][:].T)
 
     return np.concatenate(imfs, axis=1)
