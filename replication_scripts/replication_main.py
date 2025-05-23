@@ -49,7 +49,7 @@ def reformat_dict(loss_dict):
 
 
 def get_replication_res_json():
-    data = get_data("data_files/Todorov-Zhang-JAE-2021.csv")
+    data = get_data()
 
     with open("regressions_on_rv_results.json", "w") as f:
         loss_values_on_rv = get_regression_results(*get_regressions_on_rv_args(), data)

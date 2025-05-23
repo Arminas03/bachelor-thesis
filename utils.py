@@ -1,8 +1,10 @@
 import pandas as pd
 
+from constants import *
 
-def get_data(path="data_files/Todorov-Zhang-JAE-2021.csv"):
-    data = pd.read_csv(path).rename(columns={"???Date": "date"})
+
+def get_data():
+    data = pd.read_csv(PATH_TO_JAE_DATA).rename(columns={"???Date": "date"})
     data["date"] = pd.to_datetime(data["date"])
 
     return data
@@ -11,7 +13,7 @@ def get_data(path="data_files/Todorov-Zhang-JAE-2021.csv"):
 def transform_volatility_by_horizon(true_volatility, horizon):
     """
     Transforms volatility by given horizon.
-    Note that the last horizon - 1 observations are lost
+    Note that the first horizon - 1 observations are lost
     """
     transformed_vol = []
     c = 1

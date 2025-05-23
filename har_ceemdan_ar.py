@@ -12,7 +12,6 @@ from regression_common import (
     get_regression_model,
     winsorise,
 )
-from analysis_tools import plot_true_vs_pred
 
 
 def get_har_pred(target_estimator, predictor_estimators):
