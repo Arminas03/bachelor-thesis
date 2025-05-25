@@ -54,14 +54,29 @@ def reformat_dict(loss_dict):
 def plot_estimators_time_series(estimators: pd.DataFrame):
     estimators.index = estimators["date"]
     estimators = estimators.drop("date", axis=1)
+    n_estimators = estimators.shape[1]
 
-    for var_est in estimators.columns:
-        estimators[var_est].plot(linewidth=0.6)
-        plt.title(f"{var_est}")
-        plt.xlabel("Date")
-        plt.ylabel(var_est)
-        plt.grid(True)
-        plt.show()
+    figure, axes = plt.subplots(
+        n_estimators, 1, figsize=(12, 2 * n_estimators), sharex=True
+    )
+    for i in range(n_estimators):
+        axes[i].plot(
+            estimators.iloc[:, i],
+            label=f"{estimators.columns[i]}",
+            linewidth=0.7,
+            color=(
+                (0.2 + 0.6 * (i / n_estimators)) % 1,
+                (0.5 + 0.4 * (i / n_estimators)) % 1,
+                (0.8 - 0.6 * (i / n_estimators)) % 1,
+            ),
+        )
+        axes[i].legend(loc="upper right")
+        axes[i].grid(True)
+
+    axes[-1].set_xlabel("Date")
+    figure.canvas.manager.set_window_title(f"estimators_time_series")
+    plt.tight_layout()
+    plt.show()
 
 
 def get_replication_res_json():
@@ -88,4 +103,3 @@ def get_replication_res_json():
 
 if __name__ == "__main__":
     get_replication_res_json()
-    plot_estimators_time_series(get_data())
