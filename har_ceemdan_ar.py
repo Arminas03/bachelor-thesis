@@ -4,7 +4,7 @@ from sklearn.preprocessing import StandardScaler
 import json
 
 
-from utils import get_data
+from utils import get_jae_data, transform_volatility_by_horizon
 from regression_common import (
     regress,
     rolling_window,
@@ -15,12 +15,12 @@ from regression_common import (
 from constants import *
 
 
-def get_har_pred(target_estimator, predictor_estimators):
-    data = get_data()
+def get_har_pred(target_estimator, predictor_estimators, h):
+    data = get_jae_data()
     target_ts = data[target_estimator]
     predictor_ts = data[predictor_estimators]
 
-    return regress(predictor_ts, target_ts, horizon=1, estimation_method=rolling_window)
+    return regress(predictor_ts, target_ts, horizon=h, estimation_method=rolling_window)
 
 
 def get_curr_imfs(i, predictor_estimators):
@@ -32,14 +32,16 @@ def get_curr_imfs(i, predictor_estimators):
     return np.concatenate(imfs, axis=1)
 
 
-def get_ceemdan_ar_pred(target_estimator, predictor_estimators, window_size=1000):
+def get_ceemdan_ar_pred(target_estimator, predictor_estimators, h, window_size=1000):
     # 22 first observations must be discarded due to comparison with HAR-RV
     # Pushed by 1 due to future
-    rv_ts = np.array(get_data()[target_estimator][21 + 1 :])
+    rv_ts = np.array(
+        transform_volatility_by_horizon(get_jae_data()[target_estimator], h)[21 + 1 :]
+    )
     y_pred_imf = []
     y_test = []
 
-    for i in range(len(rv_ts) - window_size):
+    for i in range(len(rv_ts) - window_size - h + 1):
         curr_imf = get_curr_imfs(i, predictor_estimators)
 
         y_train_window = rv_ts[i : window_size + i - 1]
@@ -75,13 +77,13 @@ def add_losses_to_dict(losses):
     }
 
 
-def get_res_dict(models_regressors, target):
+def get_res_dict(models_regressors, target, horizon=1):
     res_dict = dict()
 
     for model_name, regressors in models_regressors.items():
-        losses_har = get_prediction_loss(*get_har_pred(target, regressors))
+        losses_har = get_prediction_loss(*get_har_pred(target, regressors, horizon))
         losses_ceemdan_ar = get_prediction_loss(
-            *get_ceemdan_ar_pred(target, regressors)
+            *get_ceemdan_ar_pred(target, regressors, horizon)
         )
 
         res_dict[f"HAR-{model_name}"] = add_losses_to_dict(losses_har)
@@ -100,5 +102,11 @@ def get_har_ceemdan_ar_res_json():
     }
     target = "RV"
 
-    with open("har_ceemdan_ar_results.json", "w") as f:
-        json.dump(get_res_dict(models_regressors, target), f)
+    for horizon in [1, 5, 22]:
+        print(f"Horizon: {horizon}")
+        with open(f"har_ceemdan_ar_results_h_{horizon}.json", "w") as f:
+            json.dump(get_res_dict(models_regressors, target, horizon), f)
+
+
+if __name__ == "__main__":
+    get_har_ceemdan_ar_res_json()

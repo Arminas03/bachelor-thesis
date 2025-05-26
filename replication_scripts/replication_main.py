@@ -3,7 +3,7 @@ import json
 import matplotlib.pyplot as plt
 
 from replication_scripts.replication_regression import get_regression_results
-from utils import get_data
+from utils import get_jae_data
 
 
 def get_regressions_on_rv_args():
@@ -80,7 +80,7 @@ def plot_estimators_time_series(estimators: pd.DataFrame):
 
 
 def get_replication_res_json():
-    data = get_data()
+    data = get_jae_data()
 
     plot_estimators_time_series(data.copy())
 

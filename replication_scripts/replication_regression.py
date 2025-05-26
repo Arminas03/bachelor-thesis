@@ -1,5 +1,3 @@
-import numpy as np
-
 from regression_common import (
     rolling_window,
     increasing_window,

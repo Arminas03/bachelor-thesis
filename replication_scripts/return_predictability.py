@@ -5,7 +5,7 @@ import json
 import matplotlib.pyplot as plt
 
 from constants import *
-from utils import get_data, transform_volatility_by_horizon
+from utils import get_jae_data, transform_volatility_by_horizon
 
 
 def get_vix_close_data(from_="2008-01-01", to="2019-01-01"):
@@ -27,7 +27,7 @@ def get_mkt_excess_return_data(from_="2008-01-01", to="2019-01-01"):
 
 
 def get_jae_data():
-    data_jae = get_data()
+    data_jae = get_jae_data()
     data_jae.index = data_jae["date"]
 
     return data_jae
@@ -89,6 +89,34 @@ def get_regression_statistics(mkt, vrp_1, vrp_2, jrp):
     return res_dict_for_horizon
 
 
+def plot_predictability_rsquared():
+    with open("return_predictability.json", "r") as f:
+        data = json.load(f)
+
+    horizons = range(1, 13)
+    vrp_1_r2 = [data[f"horizon_{h}_month"]["vrp_1"]["r_squared"] for h in horizons]
+    vrp_2_r2 = [data[f"horizon_{h}_month"]["vrp_2"]["r_squared"] for h in horizons]
+    jrp_r2 = [data[f"horizon_{h}_month"]["jrp"]["r_squared"] for h in horizons]
+
+    figure = plt.figure(figsize=(10, 5))
+    plt.plot(horizons, vrp_1_r2, marker="x", linestyle="None", label="VRP1")
+    # fmt: off
+    plt.plot(
+        horizons, vrp_2_r2,marker="o",linestyle="None",label="VRP2", markerfacecolor="none"
+    )
+    # fmt: on
+    plt.plot(horizons, jrp_r2, marker="$*$", linestyle="None", label="JRP")
+
+    figure.canvas.manager.set_window_title("return_predictability_R2_plot")
+    plt.xlabel("Horizon in months", fontsize=14)
+    plt.ylabel("R2", fontsize=18)
+    plt.xticks(horizons)
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
 def get_return_predictability_json():
     jae_data = get_jae_data()
     allowed_dates = set(jae_data["date"])
@@ -115,34 +143,6 @@ def get_return_predictability_json():
         json.dump(res_dict, f)
 
     plot_predictability_rsquared()
-
-
-def plot_predictability_rsquared():
-    with open("return_predictability.json", "r") as f:
-        data = json.load(f)
-
-    horizons = range(1, 13)
-    vrp_1_r2 = [data[f"horizon_{h}_month"]["vrp_1"]["r_squared"] for h in horizons]
-    vrp_2_r2 = [data[f"horizon_{h}_month"]["vrp_2"]["r_squared"] for h in horizons]
-    jrp_r2 = [data[f"horizon_{h}_month"]["jrp"]["r_squared"] for h in horizons]
-
-    plt.figure(figsize=(10, 5))
-    plt.plot(horizons, vrp_1_r2, marker="x", linestyle="None", label="VRP1")
-    # fmt: off
-    plt.plot(
-        horizons, vrp_2_r2,marker="o",linestyle="None",label="VRP2", markerfacecolor="none"
-    )
-    # fmt: on
-    plt.plot(horizons, jrp_r2, marker="$*$", linestyle="None", label="JRP")
-
-    plt.title("R2")
-    plt.xlabel("Horizon in months")
-    plt.ylabel("R2")
-    plt.xticks(horizons)
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
 
 
 if __name__ == "__main__":

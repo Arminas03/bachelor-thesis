@@ -3,9 +3,9 @@ import pandas as pd
 from constants import *
 
 
-def get_data():
+def get_jae_data():
     data = pd.read_csv(PATH_TO_JAE_DATA).rename(columns={"???Date": "date"})
-    data["date"] = pd.to_datetime(data["date"])
+    data["date"] = pd.to_datetime(data["date"], format="%m/%d/%y")
 
     return data
 

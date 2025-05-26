@@ -3,7 +3,7 @@ import pandas as pd
 import h5py
 import matplotlib.pyplot as plt
 
-from utils import get_data
+from utils import get_jae_data
 from constants import *
 
 
@@ -57,7 +57,7 @@ def plot_first_imf(estimator):
 def main():
     estimators = ["RV", "OV", "TV", "EV", "JV"]
     ceemdan = CEEMDAN(seed=0)
-    data = get_data()
+    data = get_jae_data()
 
     for estimator in estimators:
         decompose_series_with_ceemdan(data[estimator], ceemdan, estimator)
