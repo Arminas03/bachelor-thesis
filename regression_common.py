@@ -67,8 +67,6 @@ def regress(
     predictors: pd.DataFrame, true_volatility: pd.Series, horizon, estimation_method
 ):
     """
-    Takes predictors and true volatility values and simulates rolling
-    window predictions.
     Note that predictors and true volatility must be of equal size and
     aligned date-by-date. The transformation is done within this function.
     Returns y_test, y_hat np arrays

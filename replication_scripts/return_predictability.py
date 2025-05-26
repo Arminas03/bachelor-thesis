@@ -2,6 +2,7 @@ import pandas as pd
 import statsmodels.api as sm
 import numpy as np
 import json
+import matplotlib.pyplot as plt
 
 from constants import *
 from utils import get_data, transform_volatility_by_horizon
@@ -97,7 +98,7 @@ def get_return_predictability_json():
     res_dict = dict()
 
     for month in range(1, 13):
-        horizon = month * 21
+        horizon = month * 22
         curr_vix = vix_series[21:-horizon]
         curr_mkt_ret = get_returns_over_horizon((mkt_ret_series / 100)[21:], horizon)
 
@@ -112,3 +113,37 @@ def get_return_predictability_json():
 
     with open("return_predictability.json", "w") as f:
         json.dump(res_dict, f)
+
+    plot_predictability_rsquared()
+
+
+def plot_predictability_rsquared():
+    with open("return_predictability.json", "r") as f:
+        data = json.load(f)
+
+    horizons = range(1, 13)
+    vrp_1_r2 = [data[f"horizon_{h}_month"]["vrp_1"]["r_squared"] for h in horizons]
+    vrp_2_r2 = [data[f"horizon_{h}_month"]["vrp_2"]["r_squared"] for h in horizons]
+    jrp_r2 = [data[f"horizon_{h}_month"]["jrp"]["r_squared"] for h in horizons]
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(horizons, vrp_1_r2, marker="x", linestyle="None", label="VRP1")
+    # fmt: off
+    plt.plot(
+        horizons, vrp_2_r2,marker="o",linestyle="None",label="VRP2", markerfacecolor="none"
+    )
+    # fmt: on
+    plt.plot(horizons, jrp_r2, marker="$*$", linestyle="None", label="JRP")
+
+    plt.title("R2")
+    plt.xlabel("Horizon in months")
+    plt.ylabel("R2")
+    plt.xticks(horizons)
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+if __name__ == "__main__":
+    get_return_predictability_json()

@@ -57,7 +57,7 @@ def plot_estimators_time_series(estimators: pd.DataFrame):
     n_estimators = estimators.shape[1]
 
     figure, axes = plt.subplots(
-        n_estimators, 1, figsize=(12, 2 * n_estimators), sharex=True
+        n_estimators, 1, figsize=(12, 2 * n_estimators + 2), sharex=True
     )
     for i in range(n_estimators):
         axes[i].plot(
