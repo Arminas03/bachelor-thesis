@@ -77,9 +77,7 @@ def add_losses_to_dict(losses):
     }
 
 
-def get_res_dict(models_regressors, target, horizon=1):
-    res_dict = dict()
-
+def update_res_dict(res_dict, models_regressors, target, horizon):
     for model_name, regressors in models_regressors.items():
         losses_har = get_prediction_loss(*get_har_pred(target, regressors, horizon))
         losses_ceemdan_ar = get_prediction_loss(
@@ -91,21 +89,29 @@ def get_res_dict(models_regressors, target, horizon=1):
 
         print(f"Finished {model_name}")
 
+
+def get_res_dict(models_regressors, target, horizon=1):
+    res_dict = dict()
+
+    update_res_dict(res_dict, {f"{target}": [target]}, target, horizon)
+    update_res_dict(res_dict, models_regressors, target, horizon)
+
     return res_dict
 
 
 def get_har_ceemdan_ar_res_json():
     models_regressors = {
-        "RV": ["RV"],
         "MV-JV": ["TV", "OV", "JV"],
         "EV": ["EV"],
     }
-    target = "RV"
+    targets = ["RV", "ORV"]
 
-    for horizon in [1, 5, 22]:
-        print(f"Horizon: {horizon}")
-        with open(f"har_ceemdan_ar_results_h_{horizon}.json", "w") as f:
-            json.dump(get_res_dict(models_regressors, target, horizon), f)
+    for target in targets:
+        print(target)
+        for horizon in [1, 5, 22]:
+            print(f"Horizon: {horizon}")
+            with open(f"har_ceemdan_ar_results_h_{horizon}_{target}.json", "w") as f:
+                json.dump(get_res_dict(models_regressors, target, horizon), f)
 
 
 if __name__ == "__main__":

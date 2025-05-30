@@ -24,7 +24,7 @@ def decompose_series_with_ceemdan(
     series: pd.Series, ceemdan: CEEMDAN, estimator_name, window_size=1000, rolling=True
 ):
     with h5py.File(
-        f"final_imfs_{'rw' if rolling else 'iw'}_{estimator_name}.h5", "w"
+        f"final_imfs_{'rw' if rolling else 'iw'}_{estimator_name.lower()}.h5", "w"
     ) as f_h5:
         for i in range(len(series) - window_size + 1):
             print("rw" if rolling else "iw", i)
@@ -54,8 +54,40 @@ def plot_first_imf(estimator):
         plt.show()
 
 
+def plot_reconstructed_first_window(estimator):
+    with h5py.File(IMF_DATA_PATHS[estimator], "r") as f_h5:
+        imfs = f_h5["window_0"][:]
+        reconstructed_estimator = imfs.sum(axis=0)
+    estimator_series = get_jae_data()[estimator][0:1000]
+
+    figure = plt.figure(figsize=(12, 6))
+
+    plt.plot(
+        reconstructed_estimator,
+        label=f"Reconstructed {estimator}",
+        linewidth=0.8,
+        color="blue",
+        linestyle="--",
+    )
+    plt.plot(
+        estimator_series,
+        label=f"True {estimator}",
+        linewidth=0.8,
+        color="red",
+        linestyle=":",
+    )
+
+    plt.xlabel("Time", fontsize=14)
+    plt.ylabel("RV", fontsize=14)
+    plt.grid(True)
+    plt.legend(fontsize=16)
+    figure.canvas.manager.set_window_title(f"Reconstructed vs true of {estimator}")
+    plt.tight_layout()
+    plt.show()
+
+
 def main():
-    estimators = ["RV", "OV", "TV", "EV", "JV"]
+    estimators = ["RV", "ORV", "OV", "TV", "EV", "JV"]
     ceemdan = CEEMDAN(seed=0)
     data = get_jae_data()
 

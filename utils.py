@@ -38,12 +38,15 @@ def transform_predictors_to_dwm(predictors, horizon):
     due to inability to calculate monthly predictor value
     """
     final_predictors = []
-    for _, predictor in predictors.items():
+    for name, predictor in predictors.items():
         for steps in [1, 5, 22]:
             final_predictors.append(
                 transform_volatility_by_horizon(predictor, steps)[
                     (22 - steps) : -horizon
                 ]
             )
+            if name == "JV":
+                # JV only 1 step back
+                break
 
     return final_predictors

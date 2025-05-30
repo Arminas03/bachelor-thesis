@@ -57,7 +57,7 @@ def plot_estimators_time_series(estimators: pd.DataFrame):
     n_estimators = estimators.shape[1]
 
     figure, axes = plt.subplots(
-        n_estimators, 1, figsize=(12, 2 * n_estimators + 2), sharex=True
+        n_estimators, 1, figsize=(12, 5 * n_estimators + 2), sharex=True
     )
     for i in range(n_estimators):
         axes[i].plot(
@@ -70,12 +70,14 @@ def plot_estimators_time_series(estimators: pd.DataFrame):
                 (0.8 - 0.6 * (i / n_estimators)) % 1,
             ),
         )
-        axes[i].legend(loc="upper right")
+        axes[i].legend(loc="upper right", fontsize=16)
         axes[i].grid(True)
 
-    axes[-1].set_xlabel("Date")
+    for label in axes[-1].get_xticklabels():
+        label.set_fontsize(12)
+
     figure.canvas.manager.set_window_title(f"estimators_time_series")
-    plt.tight_layout()
+    plt.tight_layout(pad=7.0)
     plt.show()
 
 
@@ -102,4 +104,9 @@ def get_replication_res_json():
 
 
 if __name__ == "__main__":
-    get_replication_res_json()
+    # get_replication_res_json()
+    with open("regressions_with_jv_results.json", "w") as f:
+        loss_values_with_jv = get_regression_results(
+            *get_regressions_with_jv_args(), get_jae_data()
+        )
+        json.dump(reformat_dict(loss_values_with_jv), f)
