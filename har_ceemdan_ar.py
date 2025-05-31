@@ -23,6 +23,18 @@ def get_har_pred(target_estimator, predictor_estimators, h):
     return regress(predictor_ts, target_ts, horizon=h, estimation_method=rolling_window)
 
 
+def get_log_har_pred(target_estimator, predictor_estimators, h):
+    data = get_jae_data()
+    target_ts = np.log(data[target_estimator])
+    predictor_ts = np.log(data[predictor_estimators])
+
+    y_pred, y_test = regress(
+        predictor_ts, target_ts, horizon=h, estimation_method=rolling_window
+    )
+
+    return np.exp(y_pred), np.exp(y_test)
+
+
 def get_curr_imfs(i, predictor_estimators):
     imfs = []
     for predictor_estimator in predictor_estimators:
@@ -83,9 +95,13 @@ def update_res_dict(res_dict, models_regressors, target, horizon):
         losses_ceemdan_ar = get_prediction_loss(
             *get_ceemdan_ar_pred(target, regressors, horizon)
         )
+        losses_log_har = get_prediction_loss(
+            *get_log_har_pred(target, regressors, horizon)
+        )
 
         res_dict[f"HAR-{model_name}"] = add_losses_to_dict(losses_har)
         res_dict[f"CEEMDAN-AR-{model_name}"] = add_losses_to_dict(losses_ceemdan_ar)
+        res_dict[f"log-HAR-{model_name}"] = add_losses_to_dict(losses_log_har)
 
         print(f"Finished {model_name}")
 
