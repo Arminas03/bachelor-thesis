@@ -20,17 +20,15 @@ def get_har_pred(target_estimator, predictor_estimators, h):
     target_ts = data[target_estimator]
     predictor_ts = data[predictor_estimators]
 
-    return regress(predictor_ts, target_ts, horizon=h, estimation_method=rolling_window)
+    return regress(predictor_ts, target_ts, h, rolling_window)
 
 
 def get_log_har_pred(target_estimator, predictor_estimators, h):
     data = get_jae_data()
-    target_ts = np.log(data[target_estimator])
-    predictor_ts = np.log(data[predictor_estimators])
+    target_ts = data[target_estimator]
+    predictor_ts = data[predictor_estimators]
 
-    y_pred, y_test = regress(
-        predictor_ts, target_ts, horizon=h, estimation_method=rolling_window
-    )
+    y_pred, y_test = regress(predictor_ts, target_ts, h, rolling_window, True)
 
     return np.exp(y_pred), np.exp(y_test)
 

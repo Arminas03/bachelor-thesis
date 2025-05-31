@@ -64,7 +64,11 @@ def rolling_window(X, y, rw_size=1000):
 
 
 def regress(
-    predictors: pd.DataFrame, true_volatility: pd.Series, horizon, estimation_method
+    predictors: pd.DataFrame,
+    true_volatility: pd.Series,
+    horizon,
+    estimation_method,
+    regress_log=False,
 ):
     """
     Note that predictors and true volatility must be of equal size and
@@ -78,5 +82,9 @@ def regress(
         # 22 observations lost due to monthly, push by 1 due to future
         transform_volatility_by_horizon(true_volatility, horizon)[21 + 1 :]
     )
+
+    if regress_log:
+        predictors_transformed = np.log(predictors_transformed)
+        true_volatility_transformed = np.log(true_volatility_transformed)
 
     return estimation_method(predictors_transformed, true_volatility_transformed, 1000)
