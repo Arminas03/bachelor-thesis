@@ -28,9 +28,9 @@ def get_log_har_pred(target_estimator, predictor_estimators, h):
     target_ts = data[target_estimator]
     predictor_ts = data[predictor_estimators]
 
-    y_pred, y_test = regress(predictor_ts, target_ts, h, rolling_window, True)
+    y_true, y_pred = regress(predictor_ts, target_ts, h, rolling_window, True)
 
-    return np.exp(y_pred), np.exp(y_test)
+    return np.exp(y_true), np.exp(y_pred)
 
 
 def get_curr_imfs(i, predictor_estimators):

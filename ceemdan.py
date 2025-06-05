@@ -86,7 +86,7 @@ def plot_reconstructed_first_window(estimator):
     plt.show()
 
 
-def main():
+def ceemdan():
     estimators = ["RV", "ORV", "OV", "TV", "EV", "JV"]
     ceemdan = CEEMDAN(seed=0)
     data = get_jae_data()
@@ -96,4 +96,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    ceemdan()
