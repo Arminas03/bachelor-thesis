@@ -2,8 +2,12 @@ import numpy as np
 import pandas as pd
 
 from sklearn.linear_model import HuberRegressor
-from analysis_tools import get_squared_errors, get_qlike
-from utils import transform_predictors_to_dwm, transform_volatility_by_horizon
+from utils import (
+    transform_predictors_to_dwm,
+    transform_volatility_by_horizon,
+    get_squared_errors,
+    get_qlike,
+)
 
 
 def get_regression_model(X, y, alpha_ridge=0, fit_intercept=True):

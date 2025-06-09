@@ -12,7 +12,7 @@ from regression_common import (
     get_regression_model,
     winsorise,
 )
-from constants import *
+from paths import *
 
 
 def get_har_pred(target_estimator, predictor_estimators, h):

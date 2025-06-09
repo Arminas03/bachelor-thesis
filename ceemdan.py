@@ -4,7 +4,7 @@ import h5py
 import matplotlib.pyplot as plt
 
 from utils import get_jae_data
-from constants import *
+from paths import *
 
 
 def get_imf_counter(h5_path):

@@ -4,7 +4,7 @@ import numpy as np
 import json
 import matplotlib.pyplot as plt
 
-from constants import *
+from paths import *
 from utils import get_jae_data, transform_volatility_by_horizon
 
 

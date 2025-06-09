@@ -104,9 +104,4 @@ def get_replication_res_json():
 
 
 if __name__ == "__main__":
-    # get_replication_res_json()
-    with open("regressions_with_jv_results.json", "w") as f:
-        loss_values_with_jv = get_regression_results(
-            *get_regressions_with_jv_args(), get_jae_data()
-        )
-        json.dump(reformat_dict(loss_values_with_jv), f)
+    get_replication_res_json()
