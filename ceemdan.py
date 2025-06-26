@@ -37,14 +37,15 @@ def decompose_series_with_ceemdan(
             )
 
 
-def plot_first_imf(estimator):
+def plot_imfs(estimator, dates):
+    dates = dates[:1000]
     with h5py.File(IMF_DATA_PATHS[estimator], "r") as f_h5:
         imfs = f_h5["window_0"][:]
         n_imfs = imfs.shape[0]
 
         figure, axes = plt.subplots(n_imfs, 1, figsize=(12, 2 * n_imfs), sharex=True)
         for i in range(n_imfs):
-            axes[i].plot(imfs[i], label=f"IMF {i+1}", linewidth=0.6)
+            axes[i].plot(dates, imfs[i], label=f"IMF {i+1}", linewidth=0.6)
             axes[i].legend(loc="upper right")
             axes[i].grid(True)
 
@@ -54,7 +55,8 @@ def plot_first_imf(estimator):
         plt.show()
 
 
-def plot_reconstructed_first_window(estimator):
+def plot_reconstructed_first_window(estimator, dates):
+    dates = dates[:1000]
     with h5py.File(IMF_DATA_PATHS[estimator], "r") as f_h5:
         imfs = f_h5["window_0"][:]
         reconstructed_estimator = imfs.sum(axis=0)
@@ -63,6 +65,7 @@ def plot_reconstructed_first_window(estimator):
     figure = plt.figure(figsize=(12, 6))
 
     plt.plot(
+        dates,
         reconstructed_estimator,
         label=f"Reconstructed {estimator}",
         linewidth=0.8,
@@ -70,6 +73,7 @@ def plot_reconstructed_first_window(estimator):
         linestyle="--",
     )
     plt.plot(
+        dates,
         estimator_series,
         label=f"True {estimator}",
         linewidth=0.8,
@@ -93,6 +97,10 @@ def ceemdan():
 
     for estimator in estimators:
         decompose_series_with_ceemdan(data[estimator], ceemdan, estimator)
+
+    for estimator in estimators:
+        plot_imfs(estimator, data["date"])
+        plot_reconstructed_first_window(estimator, data["date"])
 
 
 if __name__ == "__main__":

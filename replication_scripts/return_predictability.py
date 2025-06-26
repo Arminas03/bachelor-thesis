@@ -26,7 +26,7 @@ def get_mkt_excess_return_data(from_="2008-01-01", to="2019-01-01"):
     return mkt_ret.loc[(mkt_ret.index > from_) & (mkt_ret.index < to)]
 
 
-def get_jae_data():
+def get_indexed_jae_data():
     data_jae = get_jae_data()
     data_jae.index = data_jae["date"]
 
@@ -118,7 +118,7 @@ def plot_predictability_rsquared():
 
 
 def get_return_predictability_json():
-    jae_data = get_jae_data()
+    jae_data = get_indexed_jae_data()
     allowed_dates = set(jae_data["date"])
     vix_series = trim_series(get_vix_close_data(), allowed_dates)
     mkt_ret_series = trim_series(get_mkt_excess_return_data(), allowed_dates)
