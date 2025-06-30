@@ -21,14 +21,12 @@ def get_imf_counter(h5_path):
 
 
 def decompose_series_with_ceemdan(
-    series: pd.Series, ceemdan: CEEMDAN, estimator_name, window_size=1000, rolling=True
+    series: pd.Series, ceemdan: CEEMDAN, estimator_name, window_size=1000
 ):
-    with h5py.File(
-        f"final_imfs_{'rw' if rolling else 'iw'}_{estimator_name.lower()}.h5", "w"
-    ) as f_h5:
+
+    with h5py.File(IMF_DATA_PATHS[estimator_name], "w") as f_h5:
         for i in range(len(series) - window_size + 1):
-            print("rw" if rolling else "iw", i)
-            curr_window = series[i if rolling else 0 : window_size + i].to_numpy()
+            curr_window = series[i : window_size + i].to_numpy()
 
             f_h5.create_dataset(
                 name=f"window_{i}",
