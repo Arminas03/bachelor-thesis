@@ -70,8 +70,7 @@ results_arfima <- data.frame(
   mean_se = numeric(),
   median_se = numeric(),
   mean_qlike = numeric(),
-  median_qlike = numeric(),
-  stringsAsFactors = FALSE
+  median_qlike = numeric()
 )
 regressors <- list(RV = data_jae$RV, ORV = data_jae$ORV)
 
@@ -83,9 +82,6 @@ for (regressor_name in names(regressors)) {
         "Running ", regressor_name, "order = ",
         arfima_order, " horizon = ", horizon, "\n"
       )
-      if (regressor_name != "ORV" || horizon < 20 || arfima_order[1] != 5) {
-        next
-      }
       res <- run_arfima_regression(regressor, arfima_order, horizon)
       
       results_arfima <- rbind(results_arfima, data.frame(
