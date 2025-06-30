@@ -2,7 +2,8 @@
 
 1. Download the required datasets listed below
 2. Update dataset paths in `paths.py`
-3. Run `main.py` to obtain the results
+3. Run `main.py` to obtain the main results
+4. Run `arfima.R` to obtain ARFIMA results
 
 ## Required datasets
 
