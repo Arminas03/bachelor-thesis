@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import statsmodels.api
+from statsmodels.robust.robust_linear_model import RLM
+from statsmodels.robust.norms import HuberT
+
 
 from paths import *
 
@@ -10,6 +14,28 @@ def get_jae_data():
     data["date"] = pd.to_datetime(data["date"], format="%m/%d/%y")
 
     return data
+
+
+def print_coef_analysis(X, y):
+    print("\n\n\n")
+    print("-" * 50)
+    print("First window regression coefficient analysis")
+    print("-" * 50)
+    X_train = statsmodels.api.add_constant(X)
+    model = RLM(y, X_train, M=HuberT()).fit()
+
+    df = pd.DataFrame(
+        {
+            "coef": model.params,
+            "std err": model.bse,
+            "z": model.tvalues,
+            "p>|z|": model.pvalues,
+        }
+    )
+    df.index = ["const"] + [f"IMF{i}" for i in range(1, 9)]
+
+    print(df.round(6))
+    print("\n\n\n")
 
 
 def transform_volatility_by_horizon(true_volatility, horizon):

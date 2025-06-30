@@ -4,7 +4,7 @@ from sklearn.preprocessing import StandardScaler
 import json
 
 
-from utils import get_jae_data, transform_volatility_by_horizon
+from utils import get_jae_data, transform_volatility_by_horizon, print_coef_analysis
 from regression_common import (
     regress,
     rolling_window,
@@ -61,9 +61,11 @@ def get_ceemdan_ar_pred(target_estimator, predictor_estimators, h, window_size=1
         curr_imf = imf_scaler.fit_transform(curr_imf)
         y_train_window = y_scaler.fit_transform(y_train_window.reshape(-1, 1)).ravel()
 
-        y_pred = get_regression_model(curr_imf[:-1], y_train_window).predict(
-            curr_imf[-1].reshape(1, -1)
-        )[0]
+        if i == 0 and target_estimator == "RV":
+            print_coef_analysis(curr_imf[:-1], y_train_window)
+
+        model = get_regression_model(curr_imf[:-1], y_train_window)
+        y_pred = model.predict(curr_imf[-1].reshape(1, -1))[0]
         y_pred_imf.append(
             winsorise(
                 y_scaler.inverse_transform(y_train_window.reshape(-1, 1)).ravel(),
