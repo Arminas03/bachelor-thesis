@@ -7,7 +7,10 @@ from mincer_zarnowitz import get_mz_json
 from diebold_mariano import get_dm_test_results_for_jv
 
 
-def main():
+def main() -> None:
+    """
+    Runs all required scripts
+    """
     ceemdan()
     get_replication_res_json()
     get_har_ceemdan_ar_res_json()

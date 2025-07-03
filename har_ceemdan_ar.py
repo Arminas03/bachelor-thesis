@@ -15,7 +15,12 @@ from regression_common import (
 from paths import *
 
 
-def get_har_pred(target_estimator, predictor_estimators, h):
+def get_har_pred(
+    target_estimator: str, predictor_estimators: list[str], h: int
+) -> tuple[np.array, np.array]:
+    """
+    Fits and gets predictions of HAR model
+    """
     data = get_jae_data()
     target_ts = data[target_estimator]
     predictor_ts = data[predictor_estimators]
@@ -23,7 +28,12 @@ def get_har_pred(target_estimator, predictor_estimators, h):
     return regress(predictor_ts, target_ts, h, rolling_window)
 
 
-def get_log_har_pred(target_estimator, predictor_estimators, h):
+def get_log_har_pred(
+    target_estimator: str, predictor_estimators: list[str], h: int
+) -> tuple[np.array, np.array]:
+    """
+    Fits and gets log-HAR predictions
+    """
     data = get_jae_data()
     target_ts = data[target_estimator]
     predictor_ts = data[predictor_estimators]
@@ -33,16 +43,27 @@ def get_log_har_pred(target_estimator, predictor_estimators, h):
     return np.exp(y_true), np.exp(y_pred)
 
 
-def get_curr_imfs(i, predictor_estimators):
+def get_curr_imfs(window_idx: int, predictor_estimators: list[str]) -> np.array:
+    """
+    Gets IMFs of the current window
+    """
     imfs = []
     for predictor_estimator in predictor_estimators:
         with h5py.File(IMF_DATA_PATHS[predictor_estimator], "r") as f_h5:
-            imfs.append(f_h5[f"window_{i+21}"][:].T)
+            imfs.append(f_h5[f"window_{window_idx+21}"][:].T)
 
     return np.concatenate(imfs, axis=1)
 
 
-def get_ceemdan_ar_pred(target_estimator, predictor_estimators, h, window_size=1000):
+def get_ceemdan_ar_pred(
+    target_estimator: str,
+    predictor_estimators: list[str],
+    h: int,
+    window_size: int = 1000,
+) -> tuple[np.array, np.array]:
+    """
+    Fits and gets predictions for CEEMDAN-AR(1) model
+    """
     # 22 first observations must be discarded due to comparison with HAR-RV
     # Pushed by 1 due to future
     rv_ts = np.array(
@@ -76,7 +97,10 @@ def get_ceemdan_ar_pred(target_estimator, predictor_estimators, h, window_size=1
     return np.array(y_test), np.array(y_pred_imf)
 
 
-def add_losses_to_dict(losses):
+def add_losses_to_dict(losses: tuple) -> dict:
+    """
+    Adds resulting losses to a dictionary
+    """
     return {
         "squared_error": {
             "mean": losses[0][0],
@@ -89,7 +113,12 @@ def add_losses_to_dict(losses):
     }
 
 
-def update_res_dict(res_dict, models_regressors, target, horizon):
+def update_res_dict(
+    res_dict: dict, models_regressors: dict, target: str, horizon: int
+) -> None:
+    """
+    Updates result dictionary with the resulting losses from predictions
+    """
     for model_name, regressors in models_regressors.items():
         losses_har = get_prediction_loss(*get_har_pred(target, regressors, horizon))
         losses_ceemdan_ar = get_prediction_loss(
@@ -115,7 +144,11 @@ def get_res_dict(models_regressors, target, horizon=1):
     return res_dict
 
 
-def get_har_ceemdan_ar_res_json():
+def get_har_ceemdan_ar_res_json() -> None:
+    """
+    Saves a .json file of HAR, log-HAR, and CEEMDAN-AR(1)
+    model predictions
+    """
     models_regressors = {
         "MV-JV": ["TV", "OV", "JV"],
         "EV": ["EV"],

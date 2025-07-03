@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from typing import Callable
 
 from sklearn.linear_model import HuberRegressor
 from utils import (
@@ -10,7 +11,12 @@ from utils import (
 )
 
 
-def get_regression_model(X, y, alpha_ridge=0, fit_intercept=True):
+def get_regression_model(
+    X: np.array, y: np.array, alpha_ridge: float = 0, fit_intercept: bool = True
+) -> HuberRegressor:
+    """
+    Fits and returns Huber regression model
+    """
     return HuberRegressor(
         fit_intercept=fit_intercept,
         epsilon=1.345,
@@ -20,13 +26,21 @@ def get_regression_model(X, y, alpha_ridge=0, fit_intercept=True):
     ).fit(X, y)
 
 
-def get_prediction_loss(y: np.array, y_hat: np.array):
+def get_prediction_loss(
+    y: np.array, y_hat: np.array
+) -> tuple[tuple[float, float], tuple[float, float]]:
+    """
+    Returns mean and median loss values
+    """
     # plot_true_vs_pred(y_true=y, y_pred=y_hat)
 
     return get_squared_errors(y_true=y, y_pred=y_hat), get_qlike(y_true=y, y_pred=y_hat)
 
 
-def winsorise(y, y_hat):
+def winsorise(y: np.array, y_hat: float) -> float:
+    """
+    Insanity filter of Todorov and Zhang (2022)
+    """
     if y_hat > max(y):
         return max(y)
     if y_hat < min(y):
@@ -34,7 +48,13 @@ def winsorise(y, y_hat):
     return y_hat
 
 
-def increasing_window(X, y, initial_iw_size=1000):
+def increasing_window(
+    X: np.array, y: np.array, initial_iw_size: int = 1000
+) -> tuple[np.array, np.array]:
+    """
+    Performs increasing window estimation. Returns resulting
+    predictions of given y along with true (test) values
+    """
     X_train = X[:initial_iw_size]
     y_train, y_test = y[:initial_iw_size], y[initial_iw_size:]
     y_hat = []
@@ -47,10 +67,16 @@ def increasing_window(X, y, initial_iw_size=1000):
         X_train = np.append(X_train, X[i].reshape(1, -1), axis=0)
         y_train = np.append(y_train, [y[i]], axis=0)
 
-    return y_test, y_hat
+    return y_test, np.array(y_hat)
 
 
-def rolling_window(X, y, rw_size=1000):
+def rolling_window(
+    X: np.array, y: np.array, rw_size: int = 1000
+) -> tuple[np.array, np.array]:
+    """
+    Performs rolling window estimation. Returns resulting
+    predictions of given y along with true (test) values
+    """
     X_train = X[:rw_size]
     y_train, y_test = y[:rw_size], y[rw_size:]
     y_hat = []
@@ -64,15 +90,15 @@ def rolling_window(X, y, rw_size=1000):
         X_train = np.append(X_train, X[i].reshape(1, -1), axis=0)[1:]
         y_train = np.append(y_train, [y[i]], axis=0)[1:]
 
-    return y_test, y_hat
+    return y_test, np.array(y_hat)
 
 
 def regress(
     predictors: pd.DataFrame,
     true_volatility: pd.Series,
-    horizon,
-    estimation_method,
-    regress_log=False,
+    horizon: int,
+    estimation_method: Callable[[np.array, np.array, int], tuple[np.array, np.array]],
+    regress_log: bool = False,
 ):
     """
     Note that predictors and true volatility must be of equal size and

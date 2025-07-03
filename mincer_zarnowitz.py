@@ -5,7 +5,10 @@ import json
 from har_ceemdan_ar import get_log_har_pred
 
 
-def run_mz(y_true: np.array, y_pred: np.array):
+def run_mz(y_true: np.array, y_pred: np.array) -> dict:
+    """
+    Gets Mincer-Zarnowitz regression result dict
+    """
     model = sm.OLS(y_true.reshape(-1), sm.add_constant(y_pred.reshape(-1, 1))).fit()
 
     return {
@@ -17,7 +20,10 @@ def run_mz(y_true: np.array, y_pred: np.array):
     }
 
 
-def get_mz_res_dict():
+def get_mz_res_dict() -> dict:
+    """
+    Mincer-Zarnowitz regression results for every estimator
+    """
     mz_res = dict()
     for estimator in ["RV", "ORV"]:
         mz_res[estimator] = dict()
@@ -29,7 +35,10 @@ def get_mz_res_dict():
     return mz_res
 
 
-def get_mz_json():
+def get_mz_json() -> None:
+    """
+    Saves .json of Mincer-Zarnowitz results
+    """
     with open("mz_log_har_res.json", "w") as f:
         json.dump(get_mz_res_dict(), f)
 

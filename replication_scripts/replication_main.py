@@ -6,7 +6,10 @@ from replication_scripts.replication_regression import get_regression_results
 from utils import get_jae_data
 
 
-def get_regressions_on_rv_args():
+def get_regressions_on_rv_args() -> tuple[dict, str, list[int], list[str]]:
+    """
+    Returns args for RV regressions
+    """
     lr_predictors = {
         "HAR-RV": ["RV"],
         "HAR-TV": ["TV"],
@@ -21,7 +24,10 @@ def get_regressions_on_rv_args():
     return lr_predictors, target, horizons, estimation_methods
 
 
-def get_regressions_on_orv_args():
+def get_regressions_on_orv_args() -> tuple[dict, str, list[int], list[str]]:
+    """
+    Returns args for ORV regressions
+    """
     lr_predictors = {
         "HAR-TV": ["TV"],
         "HAR-MV": ["OV", "TV"],
@@ -34,7 +40,10 @@ def get_regressions_on_orv_args():
     return lr_predictors, target, horizons, estimation_methods
 
 
-def get_regressions_with_jv_args():
+def get_regressions_with_jv_args() -> tuple[dict, str, list[int], list[str]]:
+    """
+    Returns args for RV regressions with JV
+    """
     lr_predictors = {
         "HAR-TV": ["TV"],
         "HAR-MV": ["OV", "TV"],
@@ -47,11 +56,17 @@ def get_regressions_with_jv_args():
     return lr_predictors, target, horizons, estimation_methods
 
 
-def reformat_dict(loss_dict):
+def reformat_dict(loss_dict: dict) -> dict:
+    """
+    Reformats dict for better readability in saved .json
+    """
     return {",".join(map(str, key)): value for key, value in loss_dict.items()}
 
 
-def plot_estimators_time_series(estimators: pd.DataFrame):
+def plot_estimators_time_series(estimators: pd.DataFrame) -> None:
+    """
+    Plots time series for each estimator
+    """
     estimators.index = estimators["date"]
     estimators = estimators.drop("date", axis=1)
     n_estimators = estimators.shape[1]
@@ -81,7 +96,10 @@ def plot_estimators_time_series(estimators: pd.DataFrame):
     plt.show()
 
 
-def get_replication_res_json():
+def get_replication_res_json() -> None:
+    """
+    Saves .json files for replication of Todorov and Zhang (2022)
+    """
     data = get_jae_data()
 
     plot_estimators_time_series(data.copy())

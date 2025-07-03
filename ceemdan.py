@@ -7,7 +7,11 @@ from utils import get_jae_data
 from paths import *
 
 
-def get_imf_counter(h5_path):
+def get_imf_counter(h5_path: str) -> dict:
+    """
+    Gets IMF counter throughout the period,
+    Table 5 in the paper
+    """
     with h5py.File(h5_path, "r") as f_h5:
         imf_counter = dict()
         for key in list(f_h5.keys()):
@@ -21,9 +25,11 @@ def get_imf_counter(h5_path):
 
 
 def decompose_series_with_ceemdan(
-    series: pd.Series, ceemdan: CEEMDAN, estimator_name, window_size=1000
-):
-
+    series: pd.Series, ceemdan: CEEMDAN, estimator_name: str, window_size: int = 1000
+) -> None:
+    """
+    Performs CEEMDAN decomposition
+    """
     with h5py.File(IMF_DATA_PATHS[estimator_name], "w") as f_h5:
         for i in range(len(series) - window_size + 1):
             curr_window = series[i : window_size + i].to_numpy()
@@ -35,7 +41,11 @@ def decompose_series_with_ceemdan(
             )
 
 
-def plot_imfs(estimator, dates):
+def plot_imfs(estimator: str, dates: pd.Series) -> None:
+    """
+    Plots the resulting IMFs of the first window decomposition
+    for a given estimator
+    """
     dates = dates[:1000]
     with h5py.File(IMF_DATA_PATHS[estimator], "r") as f_h5:
         imfs = f_h5["window_0"][:]
@@ -53,7 +63,10 @@ def plot_imfs(estimator, dates):
         plt.show()
 
 
-def plot_reconstructed_first_window(estimator, dates):
+def plot_reconstructed_first_window(estimator: str, dates: pd.Series) -> None:
+    """
+    Plots reconstruction from IMFs of the first decomposed window
+    """
     dates = dates[:1000]
     with h5py.File(IMF_DATA_PATHS[estimator], "r") as f_h5:
         imfs = f_h5["window_0"][:]
@@ -88,7 +101,10 @@ def plot_reconstructed_first_window(estimator, dates):
     plt.show()
 
 
-def ceemdan():
+def ceemdan() -> None:
+    """
+    Decomposes every estimator with CEEMDAN, saves and plots the results
+    """
     estimators = ["RV", "ORV", "OV", "TV", "EV", "JV"]
     ceemdan = CEEMDAN(seed=0)
     data = get_jae_data()

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from scipy.stats import norm
 import json
 
@@ -6,20 +7,32 @@ from regression_common import rolling_window, increasing_window, regress
 from utils import get_jae_data
 
 
-def get_mse_arr(y_true, y_pred):
+def get_mse_arr(y_true: np.array, y_pred: np.array) -> np.array:
+    """
+    Gets squared error array
+    """
     return (y_true - y_pred) ** 2
 
 
-def get_qlike_arr(y_true, y_pred):
+def get_qlike_arr(y_true: np.array, y_pred: np.array) -> np.array:
+    """
+    Gest QLIKE array
+    """
     return y_true / y_pred - np.log(y_true / y_pred) - 1
 
 
-def get_dm_p_value(d_arr):
+def get_dm_p_value(d_arr: np.array) -> dict:
+    """
+    Returns adjusted DM test results
+    """
     dm_statistic = np.sqrt(len(d_arr)) * np.mean(d_arr) / np.std(d_arr, ddof=1)
     return {"statistic": dm_statistic, "p_value": 1 - norm.cdf(abs(dm_statistic))}
 
 
-def get_dm_analysis(y_true, y_pred_1, y_pred_2):
+def get_dm_analysis(y_true: np.array, y_pred_1: np.array, y_pred_2: np.array) -> dict:
+    """
+    Returns DM test analysis
+    """
     d_mse = (
         get_mse_arr(y_true, y_pred_1)
         - get_mse_arr(y_true, y_pred_2)
@@ -30,8 +43,16 @@ def get_dm_analysis(y_true, y_pred_1, y_pred_2):
 
 
 def get_dm_result_dict(
-    predictors_model_1, predictors_model_2, target, horizons, estimation_methods, data
-):
+    predictors_model_1: list[str],
+    predictors_model_2: list[str],
+    target: str,
+    horizons: list[int],
+    estimation_methods: list[str],
+    data: pd.DataFrame,
+) -> dict:
+    """
+    Returns DM test results for each estimator
+    """
     # Model 1 must be nested in model 2
     results = dict()
     for horizon in horizons:
@@ -57,7 +78,10 @@ def get_dm_result_dict(
     return results
 
 
-def get_dm_test_results_for_jv():
+def get_dm_test_results_for_jv() -> None:
+    """
+    Saves .json of DM results for JV vs no JV
+    """
     dm_result_dict = get_dm_result_dict(
         ["OV", "TV"],  # HAR-MV
         ["OV", "TV", "JV"],  # HAR-MV-JV
