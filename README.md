@@ -1,3 +1,8 @@
+# Decomposing volatility: separating return variance into informative components
+
+This repository contains the code of the bachelor thesis  
+**_“Decomposing volatility: separating return variance into informative components”_**.
+
 ## Running
 
 1. Download the required datasets listed below
